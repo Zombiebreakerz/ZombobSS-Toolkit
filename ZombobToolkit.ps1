@@ -9,7 +9,7 @@ Add-Type -AssemblyName System.Windows.Forms
 $installDir = "$env:USERPROFILE\Downloads\ZombobSSToolkit"
 
 # ==============================================================================
-# TOOL DATA  (unchanged)
+# TOOL DATA
 # ==============================================================================
 $ToolData = @(
     @{ Name="PrefetchView";          Desc="Parses prefetch, extracts file info";          Category="Orbdiff";    Type="GitHub"; URL="https://github.com/Orbdiff/PrefetchView/releases/latest" },
@@ -62,6 +62,7 @@ $ToolData = @(
     @{ Name="Velociraptor";          Desc="Endpoint DFIR and threat hunting agent";      Category="Others";     Type="GitHub"; URL="https://github.com/Velocidex/velociraptor/releases/latest" },
     @{ Name="NTFS Parser";           Desc="NTFS forensics: MFT, Bitlocker, USN";        Category="Others";     Type="GitHub"; URL="https://github.com/thewhiteninja/ntfstool/releases/latest" },
     @{ Name="Hayabusa";              Desc="Fast forensics timeline generator";           Category="Others";     Type="GitHub"; URL="https://github.com/Yamato-Security/hayabusa/releases/latest" },
+    @{ Name="Recuva";                Desc="File recovery tool for deleted files";        Category="Others";     Type="Link";   URL="https://www.ccleaner.com/nl-nl/recuva/download" },
     @{ Name="Everything";            Desc="Instant filename search engine for Windows";  Category="Others";     Type="Link";   URL="https://www.voidtools.com/downloads/" },
     @{ Name="HxD";                   Desc="Fast hex editor with disk and RAM editing";   Category="Others";     Type="Link";   URL="https://mh-nexus.de/en/hxd/" },
     @{ Name="bstrings";              Desc="Searches strings with regex + YARA";          Category="Zimmerman";  Type="Web";    URL="https://download.ericzimmermanstools.com/net9/bstrings.zip" },
@@ -888,7 +889,7 @@ foreach ($cat in $Categories) {
 }
 
 # ==============================================================================
-# SEARCH FUNCTIONALITY
+# SEARCH FUNCTIONALITY (FIXED)
 # ==============================================================================
 $searchResultsList = New-Object System.Windows.Controls.ListBox
 $searchResultsList.Background = [Windows.Media.Brushes]::Transparent
@@ -900,6 +901,12 @@ $searchResultsList.ItemContainerStyle.Setters.Add(
 )
 $searchResultsList.ItemContainerStyle.Setters.Add(
     [Windows.Setter]::new([Windows.Controls.Control]::HorizontalContentAlignmentProperty, [Windows.HorizontalAlignment]::Stretch)
+)
+$searchResultsList.ItemContainerStyle.Setters.Add(
+    [Windows.Setter]::new([Windows.Controls.Control]::PaddingProperty, [System.Windows.Thickness]::new(0))
+)
+$searchResultsList.ItemContainerStyle.Setters.Add(
+    [Windows.Setter]::new([Windows.Controls.Control]::MarginProperty, [System.Windows.Thickness]::new(0))
 )
 
 $ContentHost.Children.Add($searchResultsList) | Out-Null
@@ -968,15 +975,33 @@ $SearchBox.Add_TextChanged({
         [System.Windows.Controls.Grid]::SetColumn($leftStack, 0)
         [System.Windows.Controls.Grid]::SetColumn($badge, 1)
 
-        $container = New-Object System.Windows.Controls.ListBoxItem
-        $container.Content = $grid
-        $container.Tag = $tool
-        $container.Add_MouseLeftButtonUp({
-            $selectedTool = $_.Source.Tag
+        # Create a button to make the whole item clickable
+        $button = New-Object System.Windows.Controls.Button
+        $button.Content = $grid
+        $button.Tag = $tool
+        $button.Background = [Windows.Media.Brushes]::Transparent
+        $button.BorderThickness = [System.Windows.Thickness]::new(0)
+        $button.HorizontalContentAlignment = "Stretch"
+        $button.VerticalContentAlignment = "Center"
+        $button.Cursor = "Hand"
+        $button.Focusable = $false
+
+        # Custom template to avoid default button hover visuals
+        $button.Template = [Windows.Markup.XamlReader]::Parse(
+            "<ControlTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' TargetType='Button'>" +
+            "  <Border Background='{TemplateBinding Background}' BorderThickness='0'>" +
+            "    <ContentPresenter HorizontalAlignment='Stretch' VerticalAlignment='Center'/>" +
+            "  </Border>" +
+            "</ControlTemplate>"
+        )
+
+        $button.Add_Click({
+            $clickedBtn = $_.Source
+            $selectedTool = $clickedBtn.Tag
             if ($selectedTool) { Invoke-ToolAction -tool $selectedTool }
         })
 
-        $searchResultsList.Items.Add($container) | Out-Null
+        $searchResultsList.Items.Add($button) | Out-Null
     }
 })
 
