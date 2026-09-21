@@ -6,9 +6,11 @@ Add-Type -AssemblyName System.Windows.Forms
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$installDir = "$env:USERPROFILE\Downloads\ZombobSS"
+$installDir = "$env:USERPROFILE\Downloads\ZombobSSToolkit"
 
-
+# ==============================================================================
+# TOOL DATA
+# ==============================================================================
 $ToolData = @(
     @{ Name="PrefetchView";          Desc="Parses prefetch, extracts file info";          Category="Orbdiff";    Type="GitHub"; URL="https://github.com/Orbdiff/PrefetchView/releases/latest" },
     @{ Name="BAMReveal";             Desc="Parses BAM forensic artefact";                 Category="Orbdiff";    Type="GitHub"; URL="https://github.com/Orbdiff/BAMReveal/releases/latest" },
@@ -87,13 +89,12 @@ $ToolData = @(
     @{ Name="ShellBagsView";         Desc="Views ShellBags folder access history";       Category="NirSoft";    Type="Web";    URL="https://www.nirsoft.net/utils/shellbagsview.zip" },
     @{ Name="NET 9.0";               Desc="Microsoft .NET 9 SDK runtime";                Category="Dependencies"; Type="Web"; URL="https://download.visualstudio.microsoft.com/download/pr/92dba916-bc51-4e76-8b0e-d41d37ce5fa4/ab08f3e95bf7a3d3da336a7e8c8eca63/dotnet-sdk-9.0.203-win-x64.exe" },
     @{ Name="NET 10.0";              Desc="Microsoft .NET 10 runtime";                   Category="Dependencies"; Type="Web"; URL="https://download.visualstudio.microsoft.com/download/pr/b3f93f0e-9e5e-4b4c-a4c4-36db0c4b0e3e/dotnet-runtime-10.0.0-win-x64.exe" },
-    @{ Name="VSRedist";              Desc="Visual C++ redistributable (x64)";            Category="Dependencies"; Type="Web"; URL="https://aka.ms/vs/17/release/vc_redist.x64.exe" },
-    @{ Name="DetectAC";              Desc="Detect anticheat tools";                      Category="External";     Type="Link"; URL="https://detect.ac/tools"},
-    @{ Name="OceanAC";              Desc="Detect anticheat tools";                      Category="External";     Type="Link"; URL="https://anticheat.ac/" },
-    @{ Name="EchoAC";                Desc="Detect anticheat tools";                      Category="External";     Type="Link"; URL="https://echo.ac/" }
+    @{ Name="VSRedist";              Desc="Visual C++ redistributable (x64)";            Category="Dependencies"; Type="Web"; URL="https://aka.ms/vs/17/release/vc_redist.x64.exe" }
 )
 
-
+# ==============================================================================
+# MAIN WINDOW XAML
+# ==============================================================================
 [xml]$xaml = @"
 <Window
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -187,7 +188,7 @@ $ToolData = @(
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="[Z]" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Accent}" FontFamily="Consolas"/>
                         <TextBlock Text="  Zombob SS toolkit" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextMain}"/>
-                        <TextBlock Text="  -  by Zombiebreakerz" FontSize="11" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                        <TextBlock Text="  -  by Zombob Team" FontSize="11" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" Margin="4,0,0,0"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <Button x:Name="MinBtn"   Style="{StaticResource TitleBtn}" Content="_"/>
@@ -330,7 +331,9 @@ $OpenCmdBtn    = $window.FindName("OpenCmdBtn")
 $SearchBox     = $window.FindName("SearchBox")
 $ContentHost   = $window.FindName("ContentHost")
 
-
+# ==============================================================================
+# HELPER FUNCTIONS
+# ==============================================================================
 function Write-Log {
     param([string]$msg)
     $time = Get-Date -Format "HH:mm:ss"
@@ -706,8 +709,10 @@ function Invoke-ToolAction {
     $null = $ps.BeginInvoke()
 }
 
-
-$Categories = @("Orbdiff","Spokwn","Tonynoh","Praiselily","RedLotus","Zimmerman","NirSoft","Others","Community","External","Dependencies")
+# ==============================================================================
+# GENERATE TOOL CARDS
+# ==============================================================================
+$Categories = @("Orbdiff","Spokwn","Tonynoh","Praiselily","RedLotus","Zimmerman","NirSoft","Dependencies","Others","Community")
 
 foreach ($cat in $Categories) {
     $tab = New-Object System.Windows.Controls.TabItem
@@ -883,7 +888,9 @@ foreach ($cat in $Categories) {
     $ToolsTab.Items.Add($tab) | Out-Null
 }
 
-
+# ==============================================================================
+# SEARCH FUNCTIONALITY (FIXED)
+# ==============================================================================
 $searchResultsList = New-Object System.Windows.Controls.ListBox
 $searchResultsList.Background = [Windows.Media.Brushes]::Transparent
 $searchResultsList.BorderThickness = [System.Windows.Thickness]::new(0)
