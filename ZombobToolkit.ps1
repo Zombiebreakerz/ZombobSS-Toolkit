@@ -88,9 +88,9 @@ $ToolData = @(
     @{ Name="NET 9.0";               Desc="Microsoft .NET 9 SDK runtime";                Category="Dependencies"; Type="Web"; URL="https://download.visualstudio.microsoft.com/download/pr/92dba916-bc51-4e76-8b0e-d41d37ce5fa4/ab08f3e95bf7a3d3da336a7e8c8eca63/dotnet-sdk-9.0.203-win-x64.exe" },
     @{ Name="NET 10.0";              Desc="Microsoft .NET 10 runtime";                   Category="Dependencies"; Type="Web"; URL="https://download.visualstudio.microsoft.com/download/pr/b3f93f0e-9e5e-4b4c-a4c4-36db0c4b0e3e/dotnet-runtime-10.0.0-win-x64.exe" },
     @{ Name="VSRedist";              Desc="Visual C++ redistributable (x64)";            Category="Dependencies"; Type="Web"; URL="https://aka.ms/vs/17/release/vc_redist.x64.exe" },
-    @{ Name="DetectAC";              Desc="Detect anticheat tools";                      Category="External";     Type="Web"; URL="https://detect.ac/tools"},
-    @{ Name="OceanAC";              Desc="Detect anticheat tools";                      Category="External";     Type="Web"; URL="https://anticheat.ac/" },
-    @{ Name="EchoAC";                Desc="Detect anticheat tools";                      Category="External";     Type="Web"; URL="https://echo.ac/" }
+    @{ Name="DetectAC";              Desc="Detect anticheat tools";                      Category="External";     Type="Link"; URL="https://detect.ac/tools"},
+    @{ Name="OceanAC";              Desc="Detect anticheat tools";                      Category="External";     Type="Link"; URL="https://anticheat.ac/" },
+    @{ Name="EchoAC";                Desc="Detect anticheat tools";                      Category="External";     Type="Link"; URL="https://echo.ac/" }
 )
 
 
