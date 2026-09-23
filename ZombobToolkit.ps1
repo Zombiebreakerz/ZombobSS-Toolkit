@@ -1,3 +1,4 @@
+#Requires -Version 5.1
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName PresentationCore
 Add-Type -AssemblyName WindowsBase
@@ -367,9 +368,9 @@ function Start-AppOrScript {
     $quotedPath = '"' + $Path + '"'
 
     switch ($extension) {
-        ".cmd" { Start-Process -FilePath "cmd.exe" -ArgumentList "/k", $quotedPath -WorkingDirectory $WorkingDirectory -WindowStyle Normal -Verb RunAs }
-        ".bat" { Start-Process -FilePath "cmd.exe" -ArgumentList "/k", $quotedPath -WorkingDirectory $WorkingDirectory -WindowStyle Normal -Verb RunAs }
-        default { Start-Process -FilePath $Path -WorkingDirectory $WorkingDirectory -WindowStyle Normal -Verb RunAs }
+        ".cmd" { Start-Process -FilePath "cmd.exe" -ArgumentList "/k", $quotedPath -WorkingDirectory $WorkingDirectory -WindowStyle Normal }
+        ".bat" { Start-Process -FilePath "cmd.exe" -ArgumentList "/k", $quotedPath -WorkingDirectory $WorkingDirectory -WindowStyle Normal }
+        default { Start-Process -FilePath $Path -WorkingDirectory $WorkingDirectory -WindowStyle Normal }
     }
 }
 
@@ -392,11 +393,14 @@ function Save-UrlToFile {
     $tempFile = "$OutFile.download"
     if (Test-Path -LiteralPath $tempFile) { Remove-Item -LiteralPath $tempFile -Force -ErrorAction SilentlyContinue }
 
+    $client = New-Object System.Net.WebClient
+    $client.Headers.Add("User-Agent", "ZombobSSToolkit")
     try {
-        Invoke-WebRequest -Uri $Uri -OutFile $tempFile -UserAgent "ZombobSSToolkit" -ErrorAction Stop
+        $client.DownloadFile($Uri, $tempFile)
         if (Test-Path -LiteralPath $OutFile) { Remove-Item -LiteralPath $OutFile -Force -ErrorAction Stop }
         Move-Item -LiteralPath $tempFile -Destination $OutFile -Force -ErrorAction Stop
     } finally {
+        $client.Dispose()
         if (Test-Path -LiteralPath $tempFile) { Remove-Item -LiteralPath $tempFile -Force -ErrorAction SilentlyContinue }
     }
 }
@@ -681,7 +685,13 @@ function Invoke-ToolAction {
                 Write-LogBg "Cached: $fileName - skipping download."
             } else {
                 Write-LogBg "Downloading $fileName..."
-                Invoke-WebRequest -Uri $dlUrl -OutFile $destFile -UserAgent "ZombobSSToolkit" -ErrorAction Stop
+                $wc = New-Object System.Net.WebClient
+                $wc.Headers.Add("User-Agent", "ZombobSSToolkit")
+                try {
+                    $wc.DownloadFile($dlUrl, $destFile)
+                } finally {
+                    $wc.Dispose()
+                }
                 Write-LogBg "Download complete."
             }
 
@@ -691,14 +701,14 @@ function Invoke-ToolAction {
                 $exe = Get-ChildItem -Path $destDir -Filter "*.exe" -Recurse | Select-Object -First 1
                 if ($exe) {
                     Write-LogBg "Launching $($exe.Name)..."
-                    Start-Process -FilePath $exe.FullName -Verb RunAs
+                    Start-Process -FilePath $exe.FullName -WorkingDirectory $exe.DirectoryName
                 } else {
                     Write-LogBg "No executable found, opening folder."
                     Start-Process explorer.exe "$destDir"
                 }
             } else {
                 Write-LogBg "Launching $fileName..."
-                Start-Process -FilePath $destFile -Verb RunAs
+                Start-Process -FilePath $destFile -WorkingDirectory (Split-Path -Parent $destFile)
             }
 
             Set-StatusBg "Ready" "$name launched successfully." "IDLE"
